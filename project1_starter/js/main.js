@@ -58,7 +58,7 @@ barChart.selectAll('.label-name')
   .data(topRockAlbums)
   .join('text')
       .attr('class', 'label label-name')
-      .attr('x', d => marginLeft - 5)
+      .attr('x', d => marginLeft - barMargin)
       .attr('y', (d, i) => (barMargin + (barThickness + barMargin) * i) + 14)
       .text(d => `${d.artist}, ${d.title}`)
       .attr('text-anchor', 'end');
