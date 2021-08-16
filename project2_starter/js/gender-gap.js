@@ -64,6 +64,25 @@ createViz = (data) => {
   .attr('width', width)
   .attr('height', height);
 
+
+  // Append container for the effect: defs
+  const defs = violin.append('defs');
+
+  // Add filter for the glow effect
+  const filter = defs
+    .append('filter')
+        .attr('id', 'glow');
+  filter
+    .append('feGaussianBlur')
+        .attr('stdDeviation', '3.5')
+        .attr('result', 'coloredBlur');
+  const feMerge = filter
+    .append('feMerge');
+  feMerge.append('feMergeNode')
+    .attr('in', 'coloredBlur');
+  feMerge.append('feMergeNode')
+    .attr('in', 'SourceGraphic');
+
   const spaceBetweenSports = (width - margin.left - margin.right) / (sports.length + 1);
 
   // manually draw the x-axis line... why?? I dunno...
@@ -128,7 +147,8 @@ createViz = (data) => {
       })
       .attr('fill', d => d.gender === 'women' ? colorWomen : colorMen)
       .attr('fill-opacity', 0.8)
-      .attr('stroke', 'none');
+      .attr('stroke', 'none')
+      .style("filter", "url(#glow)");
 
   const simulation = d3.forceSimulation(data)
     .force('forceX', d3.forceX(d => {
@@ -179,6 +199,28 @@ createViz = (data) => {
     .style('fill', d => d.gender === 'women' ? colorWomenCircles : colorMenCircles)
     .style('fill-opacity', 0.6)
     .style('stroke', d => d.gender === 'women' ? colorWomenCircles : colorMenCircles);
+
+
+  // add tooltip
+  let tooltip = d3.select('.tooltip')
+
+  handleMouseOver = function(event, d) {
+    tooltip.select('.name')
+      .text(d.name)
+    tooltip.select('.home')
+      .text(d.country)
+    tooltip.select('.earnings')
+      .text(d3.format('~s')(d.earnings_USD_2019))
+    tooltip.style('top', `${event.pageY}px`)
+    .style('left', `${event.pageX}px`)
+    .classed('visible', true)
+  }
+
+  d3.selectAll('circle')
+  .on('mouseover', (event, d) => {
+     console.log(event, d);
+     handleMouseOver(event, d)
+  });
 
 
 };
