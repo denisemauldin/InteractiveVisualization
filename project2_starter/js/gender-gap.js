@@ -5,6 +5,8 @@ const colorMen = '#F2C53D';
 const colorWomen = '#A6BF4B';
 const colorMenCircles = '#BF9B30';
 const colorWomenCircles = '#718233';
+const circlesRadius = 2.5;
+const circlesPadding = 0.7;
 
 // Load data here
 d3.csv('./data/pay_by_gender_all.csv')
@@ -127,6 +129,56 @@ createViz = (data) => {
       .attr('fill', d => d.gender === 'women' ? colorWomen : colorMen)
       .attr('fill-opacity', 0.8)
       .attr('stroke', 'none');
+
+  const simulation = d3.forceSimulation(data)
+    .force('forceX', d3.forceX(d => {
+      const index = sports.indexOf(d.sport) + 1;
+      return margin.left + (index * spaceBetweenSports);
+    }).strength(0.1))
+    .force('forceY', d3.forceY(d => yScale(d.earnings_USD_2019)).strength(10))
+    .force('collide', d3.forceCollide(circlesRadius + circlesPadding))
+    .force('axis', () => {
+      data.forEach(datum => {
+        const index = sports.indexOf(datum.sport) + 1;
+        const translationX = margin.left + (index * spaceBetweenSports);
+
+        // If men, move right of violin's centerline
+        if (datum.gender === 'men' && datum.x < translationX) {
+          datum.vx += 0.01 * datum.x;
+        }
+
+        // If women, move left of violin's centerline
+        if (datum.gender === 'women' && datum.x > translationX) {
+          datum.vx -= 0.01 * datum.x;
+        }
+
+        // Ensure that data doesn't go below the x axis
+        if (datum.y > height - margin.bottom) {
+          datum.vy -= 0.001 * datum.y;
+        }
+      })
+    })
+    .stop();
+
+
+  const numIterations = 300;
+  for (let i = 0; i < numIterations; i++) {
+    simulation.tick();
+  }
+
+  simulation.stop();
+
+  violin.append('g')
+    .attr('class', 'data-circles')
+    .selectAll('circle')
+    .data(data)
+    .join('circle')
+    .attr('cx', d=> d.x)
+    .attr('cy', d=> d.y)
+    .attr('r', circlesRadius)
+    .style('fill', d => d.gender === 'women' ? colorWomenCircles : colorMenCircles)
+    .style('fill-opacity', 0.6)
+    .style('stroke', d => d.gender === 'women' ? colorWomenCircles : colorMenCircles);
 
 
 };
