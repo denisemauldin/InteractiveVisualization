@@ -33,13 +33,13 @@ createBubbleChart = function (data) {
 
   const audioStreamsScale = d3.scaleLinear()
     .domain([0, d3.max(data, d => d.on_demand_audio_streams_millions)])
-    .range([0, bubbleWidth - margin.left - margin.right])
+    .range([margin.left, bubbleWidth - margin.left - margin.right])
 
   const xAxisG = bubbleChart
     .append('g')
 
   xAxisG
-    .attr('transform', `translate(${margin.left}, ${bubbleHeight - margin.bottom - margin.top})`)
+    .attr('transform', `translate(0, ${bubbleHeight - margin.bottom - margin.top})`)
     .call(d3.axisBottom(audioStreamsScale));
 
   bubbleChart
